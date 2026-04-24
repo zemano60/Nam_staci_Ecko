@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* nebo pokud by to psalo chybu, nechte tam ty původní 3 řádky: */
+/*
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+*/
