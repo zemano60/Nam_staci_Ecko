@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recenzent – Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    /* Recenzent role color: teal */
+    .sidebar-link--active { background: #ccfbf1; color: #0d9488; }
+    .sidebar-link:hover   { background: #f0fdfa; color: #0d9488; }
+    .sidebar-role-tag     { background: #ccfbf1; color: #0d9488; border-color: #5eead4; }
+    .user-avatar          { background: #0d9488; border-color: #5eead4; }
+    .sidebar-logo         { background: #0d9488; box-shadow: 0 2px 8px rgba(13,148,136,.35); }
+    .btn-primary          { background: #0d9488; box-shadow: 0 2px 8px rgba(13,148,136,.3); }
+    .btn-primary:hover    { filter: brightness(1.08); }
+  </style>
+</head>
+<body data-required-role="recenzent">
+<div class="app-wrap">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">J</div>
+      <div>
+        <div class="sidebar-brand-name">Journal</div>
+        <div class="sidebar-brand-sub">Recenzní systém</div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="avatarInitial">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-username" data-username>—</div>
+        <span class="sidebar-role-tag" data-role>recenzent</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Práce</span>
+      <a href="#" class="sidebar-link sidebar-link--active">
+        <span class="sidebar-icon">🔍</span>
+        <span>Přiřazené články</span>
+      </a>
+      <a href="../public/cisla.html" class="sidebar-link">
+        <span class="sidebar-icon">📚</span>
+        <span>Vydaná čísla</span>
+      </a>
+
+      <span class="sidebar-section-label">Podpora</span>
+      <a href="../public/help.html" class="sidebar-link">
+        <span class="sidebar-icon">❓</span>
+        <span>Nápověda</span>
+      </a>
+      <a href="../public/helpdesk.html" class="sidebar-link">
+        <span class="sidebar-icon">💬</span>
+        <span>HelpDesk</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="logoutBtn" class="btn-logout">
+        <span>↩</span> Odhlásit se
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="app-main">
+
+    <div class="app-topbar">
+      <h1>Panel recenzenta</h1>
+    </div>
+
+    <div class="app-content">
+
+      <div class="dash-greeting">
+        <h2>Přiřazené články k recenzi</h2>
+        <p>Zpracujte posudky včas — termín odevzdání je uveden u každého článku.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat__icon">📄</div>
+          <div class="dash-stat__value" id="stat-assigned">–</div>
+          <div class="dash-stat__label">Přiřazeno celkem</div>
+        </div>
+        <div class="dash-stat" style="">
+          <div class="dash-stat__icon">⏳</div>
+          <div class="dash-stat__value" id="stat-pending" style="color:#d97706;">–</div>
+          <div class="dash-stat__label">Čeká na posudek</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat__icon">✅</div>
+          <div class="dash-stat__value" id="stat-done" style="color:#0d9488;">–</div>
+          <div class="dash-stat__label">Odevzdáno</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat__icon">🕐</div>
+          <div class="dash-stat__value" id="stat-overdue" style="color:#dc2626;">–</div>
+          <div class="dash-stat__label">Po termínu</div>
+        </div>
+      </div>
+
+      <!-- Articles table -->
+      <div class="app-section">
+        <div class="app-section-head">
+          <h2>Články ke zpracování</h2>
+        </div>
+
+        <div id="r-empty" class="empty-state" style="display:none;">
+          <div class="empty-state__icon">🔍</div>
+          <div class="empty-state__title">Zatím nemáte přiřazené žádné články</div>
+          <div class="empty-state__desc">Redaktor vám přiřadí články k recenzi.</div>
+        </div>
+
+        <table id="r-table" class="table" style="display:none">
+          <thead>
+            <tr>
+              <th>Název článku</th>
+              <th>Stav mé recenze</th>
+              <th>Termín</th>
+              <th>Akce</th>
+            </tr>
+          </thead>
+          <tbody id="r-rows"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Zpracování posudku ===== -->
+<div id="reviewModal" class="modal">
+  <div class="box" style="max-width: 640px;">
+    <h3 id="v-title">Zpracovat posudek</h3>
+
+    <div class="row">
+      <h4>Článek ke stažení</h4>
+      <div id="v-download"></div>
+    </div>
+
+    <hr class="hr-divider">
+
+    <div class="form review-form">
+      <div class="field">
+        <label class="label" for="v-summary">Stručný souhrn článku:</label>
+        <textarea id="v-summary" class="input" rows="4"></textarea>
+      </div>
+      <div class="field">
+        <label class="label" for="v-strengths">Silné stránky:</label>
+        <textarea id="v-strengths" class="input" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label class="label" for="v-weaknesses">Slabé stránky:</label>
+        <textarea id="v-weaknesses" class="input" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label class="label" for="v-recommendation">Finální doporučení:</label>
+        <select id="v-recommendation" class="input">
+          <option value="">-- Vyberte --</option>
+          <option value="accept">Přijmout</option>
+          <option value="minor">Přijmout s drobnými úpravami</option>
+          <option value="major">Přepracovat</option>
+          <option value="reject">Odmítnout</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label" for="v-comments">Komentář pro redakci / šéfredaktora:</label>
+        <textarea id="v-comments" class="input" rows="3" placeholder="Např. Článek je zajímavý, ale…"></textarea>
+      </div>
+    </div>
+
+    <div class="bar">
+      <button id="v-cancel" class="btn btn-ghost">Zavřít</button>
+      <button id="v-save-draft" class="btn btn-ghost">Uložit rozpracované</button>
+      <button id="v-submit" class="btn btn-primary">Odeslat finální posudek</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/shared.js"></script>
+<script src="../assets/js/recenzent.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem('session.user'));
+      if (s) document.getElementById('avatarInitial').textContent = s.username[0].toUpperCase();
+    } catch(e){}
+
+    function updateStats(){
+      try {
+        const arts = window.Shared ? window.Shared.readArticles() : [];
+        const session = JSON.parse(sessionStorage.getItem('session.user'));
+        const me = session && session.username;
+        const now = Date.now();
+        let assigned = 0, pending = 0, done = 0, overdue = 0;
+        arts.forEach(a => {
+          if (!a.reviews) return;
+          a.reviews.forEach(r => {
+            if (r.reviewerId !== me) return;
+            assigned++;
+            if (r.status === 'submitted') done++;
+            else {
+              pending++;
+              if (r.dueDate && new Date(r.dueDate).getTime() < now) overdue++;
+            }
+          });
+        });
+        document.getElementById('stat-assigned').textContent = assigned;
+        document.getElementById('stat-pending').textContent  = pending;
+        document.getElementById('stat-done').textContent     = done;
+        document.getElementById('stat-overdue').textContent  = overdue;
+      } catch(e){}
+    }
+    updateStats();
+    setTimeout(updateStats, 800);
+  });
+</script>
+</body>
+</html>

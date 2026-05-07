@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Administrátor – panel</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    /* ===== Horní statistiky ===== */
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+    @media (max-width:920px){ .stats{grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:520px){ .stats{grid-template-columns:1fr;} }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:16px;
+      box-shadow:var(--shadow-sm);
+    }
+    .stat .k{ font-size:.82rem; color:var(--muted); font-weight:500; margin-bottom:4px; }
+    .stat .v{ font-size:1.7rem; font-weight:900; color:var(--text); }
+
+    /* ===== Tagy / shrnutí ===== */
+    .filters{
+      margin:12px 0;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .tag{
+      display:inline-block;
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:4px 10px;
+      font-size:.82rem;
+      color:var(--muted);
+      background:var(--bg-2);
+    }
+
+    .searchbar{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    /* ===== Grafy ===== */
+    .chart-bars{
+      display:flex;
+      align-items:flex-end;
+      gap:12px;
+      height:100%;
+      margin-top:16px;
+      margin-bottom:16px;
+      padding-bottom:40px;
+      position:relative;
+    }
+    .chart-bars::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:1px;
+      background:var(--border);
+    }
+    .chart-col{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      min-width:0;
+    }
+    .chart-col__bar{
+      border-radius:8px 8px 0 0;
+      width:100%;
+      background:linear-gradient(180deg, var(--primary) 0%, var(--primary-200) 100%);
+      height:var(--h,10%);
+      min-height:4px;
+      box-shadow:0 4px 14px rgba(124,58,237,.2);
+      transition:height .35s ease-out, transform .2s ease-out, box-shadow .2s ease-out;
+    }
+    .chart-col:hover .chart-col__bar{
+      transform:translateY(-4px);
+      box-shadow:0 10px 24px rgba(124,58,237,.3);
+    }
+    .chart-col__value{ font-size:.8rem; color:var(--muted); }
+    .chart-col__label{ font-size:.78rem; color:var(--muted); white-space:nowrap; }
+
+    /* ===== HelpDesk modal ===== */
+    #hdModal{
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:50;
+      align-items:center;
+      justify-content:center;
+    }
+    #hdModal .modal__backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(17,24,39,.45);
+      backdrop-filter:blur(5px);
+    }
+    #hdModal .modal__dialog{
+      position:relative;
+      z-index:1;
+      max-width:720px;
+      width:100%;
+      padding:16px;
+    }
+    #hdModal .box{
+      background:#fff;
+      border-radius:var(--radius-lg);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow-lg);
+      padding:22px;
+    }
+    .thread{
+      border:1px solid var(--border);
+      border-radius:var(--radius-md);
+      padding:10px;
+      display:grid;
+      gap:8px;
+      max-height:340px;
+      overflow:auto;
+      background:var(--bg-2);
+    }
+    .msg{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius-sm);
+      padding:10px;
+    }
+    .msg .meta{ font-size:.82rem; color:var(--muted); margin-bottom:4px; }
+  </style>
+</head>
+<body data-required-role="admin">
+<div class="app-wrap">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" style="--primary:#e11d48;--primary-50:#fff1f2;--primary-100:#ffe4e6;--primary-200:#fecdd3;">
+  <div class="sidebar-brand">
+    <div class="sidebar-logo" style="background:#e11d48;box-shadow:0 2px 8px rgba(225,29,72,.35);">J</div>
+    <div>
+      <div class="sidebar-brand-name">Journal</div>
+      <div class="sidebar-brand-sub">Administrace</div>
+    </div>
+  </div>
+
+  <div class="sidebar-user" style="background:#fff1f2;">
+    <div class="user-avatar" style="background:#e11d48;border-color:#fecdd3;">A</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-username">Administrátor</div>
+      <span class="sidebar-role-tag" style="background:#ffe4e6;color:#e11d48;border-color:#fecdd3;">admin</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <span class="sidebar-section-label">Přehled</span>
+    <a href="#" class="sidebar-link" style="background:#fff1f2;color:#e11d48;">
+      <span class="sidebar-icon">📊</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="../public/seed.html" class="sidebar-link">
+      <span class="sidebar-icon">🔧</span>
+      <span>DEMO data</span>
+    </a>
+
+    <span class="sidebar-section-label">Systém</span>
+    <a href="../public/index.html" class="sidebar-link">
+      <span class="sidebar-icon">🌐</span>
+      <span>O časopisu</span>
+    </a>
+    <a href="../public/cisla.html" class="sidebar-link">
+      <span class="sidebar-icon">📚</span>
+      <span>Vydaná čísla</span>
+    </a>
+    <a href="../public/help.html" class="sidebar-link">
+      <span class="sidebar-icon">❓</span>
+      <span>Nápověda</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button id="signout" class="btn-logout">
+      <span>↩</span> Odhlásit se
+    </button>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div class="app-main">
+
+<div class="app-topbar">
+  <h1>Admin dashboard</h1>
+</div>
+
+<div class="app-content">
+
+  <!-- HLAVNÍ PŘEHLED -->
+  <div class="app-section" style="margin-bottom:20px;">
+    <div class="app-section-head">
+      <h2>Přehled systému</h2>
+    </div>
+    <div class="app-section-body">
+      <div class="stats" id="statsTop"></div>
+      <div class="grid" style="margin-top:16px;">
+        <div>
+          <h3 style="font-size:.9rem;font-weight:700;margin-bottom:8px;">Stavy článků</h3>
+          <div class="chart-bars" id="chartStatuses"></div>
+        </div>
+        <div>
+          <h3 style="font-size:.9rem;font-weight:700;margin-bottom:8px;">Články podle rolí autorů</h3>
+          <div class="chart-bars" id="chartRoles"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABULKA ČLÁNKŮ -->
+  <div class="app-section" style="margin-bottom:20px;">
+    <div class="app-section-head"><h2>Globální vyhledávání, řazení a filtry</h2></div>
+    <div class="app-section-body" style="padding:16px 20px;">
+    <div class="searchbar" style="margin-bottom:12px">
+      <input id="q" class="input" placeholder="Hledat napříč systémem (název, autor, klíčová slova…)" style="min-width:320px" />
+      <select id="fStatus" class="input" style="max-width:220px">
+        <option value="">Všechny stavy</option>
+        <option>Koncept</option>
+        <option>Čeká na kontrolu</option>
+        <option>Vráceno k úpravě</option>
+        <option>V recenzi</option>
+        <option>Přijato</option>
+        <option>Odmítnuto</option>
+        <option>Publikováno</option>
+      </select>
+      <select id="fRole" class="input" style="max-width:220px">
+        <option value="">Všechny role autora</option>
+        <option value="autor">autor</option>
+        <option value="redaktor">redaktor</option>
+        <option value="recenzent">recenzent</option>
+        <option value="sefredaktor">sefredaktor</option>
+      </select>
+      <button id="clear" class="btn btn-ghost">Vyčistit</button>
+    </div>
+
+    <div class="filters" id="summaryTags"></div>
+
+    <table class="table" id="tbl">
+      <thead>
+      <tr>
+        <th data-sort="title">Název</th>
+        <th data-sort="authorName">Autor</th>
+        <th data-sort="status">Stav</th>
+        <th data-sort="createdAt">Vytvořeno</th>
+        <th>Akce</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <div class="tag" id="sumCount">Celkem: 0</div>
+      <div class="tag" id="sumPublished">Publikováno: 0</div>
+      <div class="tag" id="sumPending">V recenzi: 0</div>
+    </div>
+    </div><!-- /app-section-body -->
+  </div><!-- /app-section -->
+
+  <!-- HELPDESK -->
+  <div class="app-section">
+    <div class="app-section-head">
+      <h2>HelpDesk – dotazy uživatelů</h2>
+      <a href="../public/helpdesk.html" class="btn btn-ghost btn-sm">Otevřít formulář pro uživatele</a>
+    </div>
+    <div id="hdEmpty" class="empty-state" style="display:none;padding:32px;">
+      <div class="empty-state__icon">💬</div>
+      <div class="empty-state__title">Žádné dotazy</div>
+      <div class="empty-state__desc">Zatím nepřišly žádné dotazy z HelpDesku.</div>
+    </div>
+    <table class="table" id="hd">
+      <thead>
+      <tr>
+        <th>Datum</th>
+        <th>Uživatel</th>
+        <th>E-mail</th>
+        <th>Předmět</th>
+        <th>Stav</th>
+        <th>Akce</th>
+      </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div><!-- /app-content -->
+</div><!-- /app-main -->
+</div><!-- /app-wrap -->
+
+<!-- MODAL HELPDESK -->
+<div class="modal" id="hdModal" aria-hidden="true">
+  <div class="modal__backdrop" id="modalBackdrop"></div>
+  <div class="modal__dialog">
+    <div class="box">
+      <div class="panel-head">
+        <h2 id="ticketTitle">Detail dotazu</h2>
+      </div>
+      <div class="thread" id="thread"></div>
+      <div style="margin-top:10px">
+        <label for="reply" class="label">Odpověď</label>
+        <textarea id="reply" class="input" rows="4" placeholder="Napište odpověď uživateli…"></textarea>
+      </div>
+      <div class="bar" style="margin-top:16px;justify-content:flex-end;">
+        <button class="btn btn-warning" id="closeTicket">Uzavřít</button>
+        <button class="btn btn-primary" id="sendReply">Odeslat odpověď</button>
+        <button class="btn btn-ghost" id="modalClose">Zavřít</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/shared.js"></script>
+<script src="../assets/js/tips.js"></script>
+<script src="../assets/js/admin.js"></script>
+</body>
+</html>

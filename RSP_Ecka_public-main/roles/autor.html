@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Autor – Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body data-required-role="autor">
+<div class="app-wrap">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">J</div>
+      <div>
+        <div class="sidebar-brand-name">Journal</div>
+        <div class="sidebar-brand-sub">Recenzní systém</div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="avatarInitial">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-username" data-username>—</div>
+        <span class="sidebar-role-tag" data-role>autor</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Obsah</span>
+      <a href="#" class="sidebar-link sidebar-link--active">
+        <span class="sidebar-icon">📄</span>
+        <span>Moje články</span>
+      </a>
+      <a href="../public/cisla.html" class="sidebar-link">
+        <span class="sidebar-icon">📚</span>
+        <span>Vydaná čísla</span>
+      </a>
+
+      <span class="sidebar-section-label">Podpora</span>
+      <a href="../public/help.html" class="sidebar-link">
+        <span class="sidebar-icon">❓</span>
+        <span>Nápověda</span>
+      </a>
+      <a href="../public/helpdesk.html" class="sidebar-link">
+        <span class="sidebar-icon">💬</span>
+        <span>HelpDesk</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="logoutBtn" class="btn-logout">
+        <span>↩</span> Odhlásit se
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="app-main">
+
+    <!-- Top bar -->
+    <div class="app-topbar">
+      <h1>Dashboard autora</h1>
+      <div class="app-topbar-actions">
+        <button id="a-new" class="btn btn-primary">
+          + Nahrát článek
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="app-content">
+
+      <!-- Greeting -->
+      <div class="dash-greeting">
+        <h2>Vítejte, <span data-username>autore</span>! 👋</h2>
+        <p>Zde vidíte přehled všech svých článků a jejich stavu v recenzním řízení.</p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="dash-stats" id="a-stats">
+        <div class="dash-stat">
+          <div class="dash-stat__icon">📄</div>
+          <div class="dash-stat__value" id="stat-total">–</div>
+          <div class="dash-stat__label">Celkem článků</div>
+        </div>
+        <div class="dash-stat dash-stat--warning">
+          <div class="dash-stat__icon">⏳</div>
+          <div class="dash-stat__value" id="stat-inprogress">–</div>
+          <div class="dash-stat__label">Ve zpracování</div>
+        </div>
+        <div class="dash-stat dash-stat--success">
+          <div class="dash-stat__icon">✅</div>
+          <div class="dash-stat__value" id="stat-accepted">–</div>
+          <div class="dash-stat__label">Přijato</div>
+        </div>
+        <div class="dash-stat dash-stat--primary">
+          <div class="dash-stat__icon">🌐</div>
+          <div class="dash-stat__value" id="stat-published">–</div>
+          <div class="dash-stat__label">Publikováno</div>
+        </div>
+      </div>
+
+      <!-- Articles section -->
+      <div class="app-section">
+        <div class="app-section-head">
+          <h2>Moje články</h2>
+        </div>
+
+        <div id="a-empty" class="empty-state" style="display:none;">
+          <div class="empty-state__icon">📝</div>
+          <div class="empty-state__title">Zatím žádné články</div>
+          <div class="empty-state__desc">
+            Klikněte na „+ Nahrát článek" a začněte.
+          </div>
+        </div>
+
+        <table id="a-table" class="table" style="display:none">
+          <thead>
+            <tr>
+              <th>Název</th>
+              <th>Stav</th>
+              <th>Poslední verze</th>
+              <th>Naposledy změněno</th>
+              <th>Akce</th>
+            </tr>
+          </thead>
+          <tbody id="a-rows"></tbody>
+        </table>
+      </div>
+
+    </div><!-- /app-content -->
+  </div><!-- /app-main -->
+</div><!-- /app-wrap -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Nahrání článku -->
+<div id="uploadModal" class="modal" aria-hidden="true">
+  <div class="box">
+    <h3>Nahrát nový článek</h3>
+    <div class="row">
+      <label class="label" for="u-file">Soubor (PDF nebo DOCX)</label>
+      <input id="u-file" class="input" type="file" accept=".pdf,.doc,.docx">
+      <span style="font-size:.8rem;color:var(--muted);">Max 15 MB</span>
+    </div>
+    <div class="row">
+      <label class="label" for="u-title">Název článku <span class="badge" data-status="queued">povinné</span></label>
+      <input id="u-title" class="input" type="text" placeholder="Název článku">
+    </div>
+    <div class="row">
+      <label class="label" for="u-coauthors">Spoluautoři (oddělit čárkou)</label>
+      <input id="u-coauthors" class="input" type="text" placeholder="Jméno Příjmení, Jméno Příjmení">
+    </div>
+    <div class="row">
+      <label class="label" for="u-email">Kontaktní e-mail <span class="badge" data-status="queued">povinné</span></label>
+      <input id="u-email" class="input" type="email" placeholder="autor@skola.cz">
+    </div>
+    <div class="bar">
+      <button id="u-cancel" class="btn btn-ghost">Zrušit</button>
+      <button id="u-submit" class="btn btn-primary">Nahrát článek</button>
+    </div>
+    <p id="u-error" class="error" aria-live="polite"></p>
+  </div>
+</div>
+
+<!-- Správa verzí -->
+<div id="versionsModal" class="modal" aria-hidden="true">
+  <div class="box">
+    <h3>Verze článku: <span id="v-title"></span></h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Verze</th>
+          <th>Soubor</th>
+          <th>Velikost</th>
+          <th>Nahráno</th>
+        </tr>
+      </thead>
+      <tbody id="v-rows"></tbody>
+    </table>
+    <div class="row" style="margin-top:14px;">
+      <label class="label" for="v-file">Nahrát novou verzi (PDF/DOCX)</label>
+      <input id="v-file" class="input" type="file" accept=".pdf,.doc,.docx">
+    </div>
+    <div class="bar">
+      <button id="v-cancel" class="btn btn-ghost">Zavřít</button>
+      <button id="v-submit" class="btn btn-primary">Nahrát novou verzi</button>
+    </div>
+    <p id="v-error" class="error" aria-live="polite"></p>
+  </div>
+</div>
+
+<!-- Finální rozhodnutí -->
+<div id="decisionModal" class="modal" aria-hidden="true">
+  <div class="box">
+    <h3 id="dec-title">Výsledek recenzního řízení</h3>
+    <div class="row">
+      <strong>Stav:</strong> <span id="dec-status" class="badge">—</span>
+    </div>
+    <div class="row review-display">
+      <h4>Zdůvodnění:</h4>
+      <p id="dec-reason"></p>
+    </div>
+    <div class="bar">
+      <button id="dec-close" class="btn btn-ghost">Zavřít</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast">Hotovo.</div>
+
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/shared.js"></script>
+<script src="../assets/js/author.js"></script>
+
+<!-- Avatar initial + stats update -->
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    // Avatar initial letter
+    try {
+      const s = JSON.parse(sessionStorage.getItem('session.user'));
+      if (s && s.username) {
+        document.getElementById('avatarInitial').textContent = s.username[0].toUpperCase();
+      }
+    } catch(e){}
+
+    // Simple stats (updated when author.js renders table)
+    function updateStats(){
+      try {
+        const arts = window.Shared ? window.Shared.readArticles() : [];
+        const session = JSON.parse(sessionStorage.getItem('session.user'));
+        const mine = arts.filter(a => a.authorId === (session && session.username));
+        document.getElementById('stat-total').textContent      = mine.length;
+        document.getElementById('stat-inprogress').textContent = mine.filter(a => !['Přijato','Odmítnuto','Publikováno'].includes(a.status)).length;
+        document.getElementById('stat-accepted').textContent   = mine.filter(a => a.status === 'Přijato').length;
+        document.getElementById('stat-published').textContent  = mine.filter(a => a.status === 'Publikováno').length;
+      } catch(e){}
+    }
+    updateStats();
+    setTimeout(updateStats, 800);
+  });
+</script>
+</body>
+</html>

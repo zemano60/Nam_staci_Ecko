@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redaktor – Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <style>
+    /* Redaktor role color: blue */
+    .sidebar-link--active { background: #dbeafe; color: #1d4ed8; }
+    .sidebar-link:hover   { background: #eff6ff; color: #1d4ed8; }
+    .sidebar-role-tag     { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+    .user-avatar          { background: #2563eb; border-color: #93c5fd; }
+    .sidebar-logo         { background: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,.35); }
+    .app-topbar .btn-primary { background: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,.3); }
+    .app-topbar .btn-primary:hover { filter: brightness(1.08); }
+  </style>
+</head>
+<body data-required-role="redaktor">
+<div class="app-wrap">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">J</div>
+      <div>
+        <div class="sidebar-brand-name">Journal</div>
+        <div class="sidebar-brand-sub">Recenzní systém</div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="avatarInitial">?</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-username" data-username>—</div>
+        <span class="sidebar-role-tag" data-role>redaktor</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="sidebar-section-label">Práce</span>
+      <a href="#" class="sidebar-link sidebar-link--active">
+        <span class="sidebar-icon">📋</span>
+        <span>Přehled článků</span>
+      </a>
+      <a href="../public/cisla.html" class="sidebar-link">
+        <span class="sidebar-icon">📚</span>
+        <span>Vydaná čísla</span>
+      </a>
+
+      <span class="sidebar-section-label">Podpora</span>
+      <a href="../public/help.html" class="sidebar-link">
+        <span class="sidebar-icon">❓</span>
+        <span>Nápověda</span>
+      </a>
+      <a href="../public/helpdesk.html" class="sidebar-link">
+        <span class="sidebar-icon">💬</span>
+        <span>HelpDesk</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="logoutBtn" class="btn-logout">
+        <span>↩</span> Odhlásit se
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="app-main">
+
+    <div class="app-topbar">
+      <h1>Redakční panel</h1>
+      <div class="app-topbar-actions filter-bar">
+        <input id="flt-q" class="input" placeholder="Hledat název / autor / e-mail…" style="max-width:240px;" />
+        <select id="flt-status" class="input" style="max-width:180px;">
+          <option value="">Všechny stavy</option>
+          <option>Koncept</option>
+          <option>Čeká na kontrolu</option>
+          <option>V recenzi</option>
+          <option>K rozhodnutí</option>
+          <option>Vráceno k úpravě</option>
+          <option>Přijato</option>
+          <option>Odmítnuto</option>
+          <option>Publikováno</option>
+          <option>Odložen</option>
+        </select>
+        <button id="flt-clear" class="btn btn-ghost">Vyčistit</button>
+      </div>
+    </div>
+
+    <div class="app-content">
+
+      <div class="dash-greeting">
+        <h2>Přehled článků</h2>
+        <p>Spravujte články, přiřazujte recenzenty a sledujte průběh recenzního řízení.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat__icon">📄</div>
+          <div class="dash-stat__value" id="stat-all">–</div>
+          <div class="dash-stat__label">Celkem</div>
+        </div>
+        <div class="dash-stat" style="--accent:#d97706;">
+          <div class="dash-stat__icon">⏳</div>
+          <div class="dash-stat__value" id="stat-screening" style="color:#d97706;">–</div>
+          <div class="dash-stat__label">Čeká na screening</div>
+        </div>
+        <div class="dash-stat" style="">
+          <div class="dash-stat__icon">🔍</div>
+          <div class="dash-stat__value" id="stat-review" style="color:#2563eb;">–</div>
+          <div class="dash-stat__label">V recenzi</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat__icon">✅</div>
+          <div class="dash-stat__value" id="stat-done" style="color:#16a34a;">–</div>
+          <div class="dash-stat__label">Přijato / Publ.</div>
+        </div>
+      </div>
+
+      <!-- Articles table -->
+      <div class="app-section">
+        <div class="app-section-head">
+          <h2>Přehled článků a stavů</h2>
+        </div>
+
+        <div id="r-empty" class="empty-state" style="display:none;">
+          <div class="empty-state__icon">📋</div>
+          <div class="empty-state__title">Žádné články k zobrazení</div>
+          <div class="empty-state__desc">Zkuste změnit filtr nebo počkejte na nová podání.</div>
+        </div>
+
+        <table id="r-table" class="table" style="display:none">
+          <thead>
+            <tr>
+              <th data-sort="title">Název</th>
+              <th data-sort="author">Autor</th>
+              <th data-sort="status">Stav</th>
+              <th data-sort="version">Verze</th>
+              <th data-sort="updated">Poslední změna</th>
+              <th>Akce</th>
+            </tr>
+          </thead>
+          <tbody id="r-rows"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Screening / detail -->
+<div id="detailModal" class="modal">
+  <div class="box" style="max-width: 640px;">
+    <h3 id="d-title">Detail článku</h3>
+    <div class="row">
+      <div><strong>Autor:</strong> <span id="d-author">—</span></div>
+      <div><strong>Kontakt:</strong> <span id="d-email">—</span></div>
+      <div><strong>Aktuální stav:</strong> <span id="d-status" class="badge">—</span></div>
+    </div>
+    <div class="row">
+      <h4>Verze souboru</h4>
+      <div id="d-versions"></div>
+    </div>
+    <div class="row">
+      <h4>Formální kontrola</h4>
+      <p class="label" style="margin-bottom:8px;">Zaškrtni, co je v pořádku:</p>
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="checkbox" class="d-chk" data-key="format"> Správný formát (PDF/DOCX)
+      </label>
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="checkbox" class="d-chk" data-key="anonymity"> Dodržena anonymizace
+      </label>
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="checkbox" class="d-chk" data-key="length"> Rozsah v mezích
+      </label>
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">
+        <input type="checkbox" class="d-chk" data-key="thematic"> Tématicky relevantní
+      </label>
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+        <input type="checkbox" class="d-chk" data-key="attachments"> Přílohy / obrázky ok
+      </label>
+      <textarea id="d-notes" class="input" rows="2" placeholder="Poznámky ke screeningu (nepovinné)"></textarea>
+    </div>
+    <div class="row">
+      <h4>Rozhodnutí</h4>
+      <textarea id="d-reason" class="input" rows="2" placeholder="Důvod / komentář (povinný při vrácení)"></textarea>
+    </div>
+    <div class="bar">
+      <button id="d-close" class="btn btn-ghost">Zavřít</button>
+      <button id="d-return" class="btn btn-danger">Vrátit k úpravě</button>
+      <button id="d-accept" class="btn btn-primary">→ Recenzní řízení</button>
+    </div>
+    <hr class="hr-divider">
+    <div class="row">
+      <h4>Aktivní recenze &amp; termíny</h4>
+      <div id="d-reviews" class="reviews-list-editor"></div>
+    </div>
+    <div class="bar">
+      <button id="d-assign" class="btn btn-ghost">Přiřadit recenzenty…</button>
+      <button id="d-send-to-chief" class="btn btn-primary">Postoupit šéfredaktorovi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Přiřazení recenzentů -->
+<div id="assignModal" class="modal">
+  <div class="box">
+    <h3>Přiřazení recenzentů</h3>
+    <div class="row">
+      <label class="label">Vyber recenzenty (1–2):</label>
+      <select id="a-reviewers" class="input" multiple size="5"></select>
+    </div>
+    <div class="row">
+      <label class="label">Termín odevzdání posudku:</label>
+      <input id="a-due" type="date" class="input" />
+    </div>
+    <div class="bar">
+      <button id="a-cancel" class="btn btn-ghost">Zrušit</button>
+      <button id="a-save" class="btn btn-primary">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Zobrazení posudku -->
+<div id="viewReviewModal" class="modal">
+  <div class="box" style="max-width: 600px;">
+    <h3 id="v-rev-title">Zobrazení posudku</h3>
+    <div id="v-rev-content" class="review-display"></div>
+    <div class="bar">
+      <button id="v-rev-close" class="btn btn-ghost">Zavřít</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/shared.js"></script>
+<script src="../assets/js/redaktor.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem('session.user'));
+      if (s) document.getElementById('avatarInitial').textContent = s.username[0].toUpperCase();
+    } catch(e){}
+
+    function updateStats(){
+      try {
+        const arts = window.Shared ? window.Shared.readArticles() : [];
+        document.getElementById('stat-all').textContent       = arts.length;
+        document.getElementById('stat-screening').textContent = arts.filter(a => a.status === 'Čeká na kontrolu').length;
+        document.getElementById('stat-review').textContent    = arts.filter(a => ['V recenzi','K rozhodnutí'].includes(a.status)).length;
+        document.getElementById('stat-done').textContent      = arts.filter(a => ['Přijato','Publikováno'].includes(a.status)).length;
+      } catch(e){}
+    }
+    updateStats();
+    setTimeout(updateStats, 800);
+  });
+</script>
+</body>
+</html>

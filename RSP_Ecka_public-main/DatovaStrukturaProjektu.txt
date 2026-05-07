@@ -1,0 +1,75 @@
+# Dokumentace datové struktury: Projekt Journal
+
+### 1. Představení projektu
+Journal je školní simulace redakčního systému vědeckého časopisu. Aplikace funguje výhradně na straně klienta (v prohlížeči). 
+**Neobsahuje backend ani serverovou část** – veškerá data se ukládají na straně uživatele pomocí technologií `localStorage` a `sessionStorage`.
+
+Cílem projektu je demonstrovat a otestovat kompletní životní cyklus článku (workflow):
+Autor → Redaktor → Recenzent → Šéfredaktor → Publikace → Čtenář
+
+Z hlediska architektury se jedná o sadu HTML stránek (rozhraní pro jednotlivé role), které doplňuje centralizovaná aplikační logika v souboru `shared.js`.
+
+---
+
+### 2. Architektura ukládání dat
+
+#### 2.1 Správa uživatelů
+Uživatelské účty nejsou ukládány dynamicky v `localStorage`. Autentizace je řešena statickým mapováním v souboru `auth.js` pomocí objektu `users`. Každý uživatel má definovanou roli a cílovou stránku po přihlášení.
+
+#### 2.2 Aktivní session uživatele
+Po úspěšném přihlášení jsou identifikační údaje uživatele uloženy do `sessionStorage` pod klíčem `session.user`. Tato session slouží k:
+* Ověřování oprávnění (role).
+* Řízení přístupu do chráněných sekcí.
+* Dynamickému vykreslování navigace a přesměrování.
+
+#### 2.3 Články (Příspěvky)
+Jedná se o stěžejní datovou entitu systému. Kolekce článků je uložena v `localStorage["journal.articles"]`.
+Každý článek obsahuje unikátní ID, metadata (název, autor, abstrakt), seznam přidělených recenzentů, pole pro recenzní posudky a historii verzí (včetně base64 dat).
+
+#### 2.4 Recenzní posudky
+Recenze neexistují jako samostatná entita. Jsou vnořeny přímo do objektu příslušného článku v poli `article.reviews[]`. To zaručuje, že posudky jsou vždy neoddělitelně spjaty s konkrétním článkem.
+
+#### 2.5 Ukázková data (Seed)
+Speciální stránka `public/seed.html` slouží k inicializaci systému. Vygeneruje testovací články v různých fázích (draft, review, published atd.), aby bylo možné systém okamžitě testovat bez manuálního vkládání.
+
+#### 2.6 HelpDesk (Technická podpora)
+Požadavky na podporu jsou uloženy v `localStorage["journal.helpdesk"]`. Struktura ticketu umožňuje ukládat historii zpráv mezi autorem a administrátorem a sledovat stav požadavku (open/closed).
+
+---
+
+### 3. Tok dat a interakce rolí
+
+* **Autor:** Zakládá článek (`draft`) a odesílá jej redakci (`queued`).
+* **Redaktor:** Kontroluje příchozí články a přiděluje recenzenty (`review`).
+* **Recenzent:** Stahuje soubor a vkládá své hodnocení do struktury článku.
+* **Šéfredaktor:** Na základě posudků činí finální rozhodnutí (`accepted`, `rejected`, `revisions`).
+* **Publikace:** Schválené články se přepnou do stavu `published` a zobrazí se ve veřejném archivu.
+
+---
+
+### 4. Společná logika: shared.js
+Tento soubor tvoří jádro aplikace. Obsahuje metody pro:
+* Synchronizaci dat s `localStorage`.
+* Generování ID a správu verzí souborů.
+* Vyhledávání, filtrování a seskupování článků (např. pro zobrazení vydaných čísel).
+
+---
+
+### 5. Přehled souborové struktury
+
+* **Kořen:** `index.html` (login), `admin-login.html`.
+* **JS Moduly (`/assets/js/`):** `auth.js`, `shared.js`, `public.js`, `admin.js`, `helpdesk.js`.
+* **Rozhraní rolí (`/roles/`):** Stránky pro autora, redaktora, recenzenta, šéfredaktora a admina.
+* **Veřejná sekce (`/public/`):** Informace o časopisu, archiv vydání, nápověda a generátor dat.
+
+---
+
+### 6. Bezpečnostní a technická specifika
+* **Izolace:** Data jsou uložena pouze lokálně v prohlížeči daného uživatele.
+* **Simulace:** Systém loginů je určen pro demonstraci workflow, nikoliv pro reálné zabezpečení dat.
+* **Offline:** Celá aplikace je navržena pro běh bez nutnosti internetového připojení (po stažení souborů).
+
+---
+
+### 7. Závěrečné shrnutí
+Projekt Journal představuje komplexní simulaci redakčního procesu postavenou na moderních webových standardech bez nutnosti serverové infrastruktury. Architektura využívá JSON formát pro ukládání dat a modulární JavaScript pro řízení logiky mezi různými uživatelskými rolemi.

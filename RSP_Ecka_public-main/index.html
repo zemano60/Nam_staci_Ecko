@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Journal – Přihlášení</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body { background: var(--bg); }
+    body.landing { display: block; min-height: 100vh; }
+
+    /* Branding panel floating shapes */
+    .brand-shape {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: .18;
+    }
+    .brand-shape-1 {
+      width: 320px; height: 320px;
+      background: rgba(255,255,255,1);
+      top: -80px; right: -80px;
+    }
+    .brand-shape-2 {
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,1);
+      bottom: 60px; left: -60px;
+    }
+    .brand-shape-3 {
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,1);
+      bottom: 160px; right: 40px;
+    }
+
+    /* Flow steps (workflow visualization) */
+    .workflow {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 28px;
+    }
+    .wf-step {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .wf-dot {
+      width: 28px; height: 28px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; flex-shrink: 0;
+    }
+    .wf-line {
+      width: 1px; height: 16px;
+      background: rgba(255,255,255,.25);
+      margin-left: 13px;
+    }
+    .wf-text { font-size: .82rem; opacity: .85; }
+    .wf-text strong { opacity: 1; display: block; font-weight: 700; }
+
+    /* Public nav strip at top of login panel */
+    .login-top-nav {
+      display: flex; gap: 6px; align-items: center;
+      margin-bottom: 28px;
+    }
+    .login-top-nav a {
+      font-size: .8rem; color: var(--muted); font-weight: 600;
+      padding: 4px 10px; border-radius: 999px;
+      border: 1px solid transparent;
+      text-decoration: none;
+      transition: background var(--trans-fast), color var(--trans-fast), border-color var(--trans-fast);
+    }
+    .login-top-nav a:hover {
+      background: var(--primary-50); color: var(--primary);
+      border-color: var(--primary-200);
+    }
+    .login-top-nav-sep { color: var(--border); font-size: .7rem; }
+
+    /* Divider */
+    .or-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 16px 0; color: var(--muted); font-size: .78rem;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ""; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Demo quick-login chips */
+    .demo-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .demo-chip {
+      padding: 5px 11px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #fff; font-size: .78rem; font-weight: 600;
+      color: var(--text); cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
+      transition: background var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), box-shadow var(--trans-fast);
+    }
+    .demo-chip:hover {
+      background: var(--primary-100); border-color: var(--primary-200);
+      color: var(--primary); box-shadow: 0 2px 8px rgba(124,58,237,.12);
+    }
+    .demo-chip-dot {
+      width: 7px; height: 7px; border-radius: 999px;
+      background: var(--primary); flex-shrink: 0;
+    }
+
+    .login-footer {
+      margin-top: 20px; text-align: center;
+      font-size: .8rem; color: var(--muted);
+    }
+    .login-footer a { color: var(--primary); }
+  </style>
+</head>
+<body class="landing">
+  <div class="login-wrap">
+
+    <!-- ========== LEFT: Branding ========== -->
+    <aside class="login-brand">
+      <div class="brand-shape brand-shape-1"></div>
+      <div class="brand-shape brand-shape-2"></div>
+      <div class="brand-shape brand-shape-3"></div>
+
+      <div style="position:relative; z-index:1;">
+        <div class="login-brand-logo">J</div>
+
+        <h1>Journal<br>Recenzní systém</h1>
+        <p>
+          Kompletní správa vědeckého časopisu — od podání článku
+          přes recenzní řízení až po publikaci.
+        </p>
+
+        <!-- Workflow visualization -->
+        <div class="workflow">
+          <div class="wf-step">
+            <div class="wf-dot">✍️</div>
+            <div class="wf-text">
+              <strong>Autor nahraje článek</strong>
+              sleduje stav v reálném čase
+            </div>
+          </div>
+          <div class="wf-line"></div>
+          <div class="wf-step">
+            <div class="wf-dot">📋</div>
+            <div class="wf-text">
+              <strong>Redaktor provede screening</strong>
+              přiřadí recenzenty, nastaví termíny
+            </div>
+          </div>
+          <div class="wf-line"></div>
+          <div class="wf-step">
+            <div class="wf-dot">🔍</div>
+            <div class="wf-text">
+              <strong>Recenzenti zpracují posudek</strong>
+              double-blind peer review
+            </div>
+          </div>
+          <div class="wf-line"></div>
+          <div class="wf-step">
+            <div class="wf-dot">👑</div>
+            <div class="wf-text">
+              <strong>Šéfredaktor rozhodne</strong>
+              přijmout, vrátit, nebo odmítnout
+            </div>
+          </div>
+          <div class="wf-line"></div>
+          <div class="wf-step">
+            <div class="wf-dot">🌐</div>
+            <div class="wf-text">
+              <strong>Článek je publikován</strong>
+              dostupný veřejnosti
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; opacity:.6; font-size:.78rem;">
+          Projekt É-čka · VŠPJ · Řízení softwarových projektů
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== RIGHT: Login panel ========== -->
+    <div class="login-panel">
+
+      <!-- Public pages nav -->
+      <div class="login-top-nav">
+        <a href="public/index.html">O časopisu</a>
+        <span class="login-top-nav-sep">·</span>
+        <a href="public/cisla.html">Vydaná čísla</a>
+        <span class="login-top-nav-sep">·</span>
+        <a href="public/help.html">Nápověda</a>
+      </div>
+
+      <div class="card" id="login" style="max-width:360px; width:100%; margin: 0 auto;">
+
+        <div style="margin-bottom:20px;">
+          <div class="title" style="margin-bottom:4px;">Přihlásit se</div>
+          <p style="font-size:.875rem; color:var(--muted);">
+            Zadejte přihlašovací údaje pro váš účet.
+          </p>
+        </div>
+
+        <form class="form" id="loginForm">
+          <div class="field">
+            <label class="label" for="username">Uživatelské jméno</label>
+            <input
+              class="input"
+              type="text"
+              id="username"
+              name="username"
+              placeholder="např. autor"
+              autocomplete="username"
+              required
+            />
+          </div>
+          <div class="field">
+            <label class="label" for="password">Heslo</label>
+            <input
+              class="input"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button class="btn btn-primary" id="loginBtn" type="submit" style="width:100%; margin-top:4px;">
+            Přihlásit se →
+          </button>
+          <div class="error" id="error" style="margin-top:6px;"></div>
+        </form>
+
+        <!-- Demo quick-login -->
+        <div class="or-divider">Demo přihlášení</div>
+        <p style="font-size:.78rem; color:var(--muted); margin-bottom:8px;">
+          Kliknutím se přihlásíte jako daná role (heslo: <code style="background:var(--bg-2);padding:1px 5px;border-radius:4px;">heslo</code>):
+        </p>
+        <div class="demo-row" id="demoChips">
+          <button class="demo-chip" data-role="autor">
+            <span class="demo-chip-dot"></span> Autor
+          </button>
+          <button class="demo-chip" data-role="redaktor">
+            <span class="demo-chip-dot" style="background:#2563eb;"></span> Redaktor
+          </button>
+          <button class="demo-chip" data-role="recenzent">
+            <span class="demo-chip-dot" style="background:#0d9488;"></span> Recenzent
+          </button>
+          <button class="demo-chip" data-role="sefredaktor">
+            <span class="demo-chip-dot" style="background:#d97706;"></span> Šéfredaktor
+          </button>
+        </div>
+      </div>
+
+      <div class="login-footer">
+        <a href="admin-login.html">Přihlásit jako administrátor</a>
+        &nbsp;·&nbsp;
+        <a href="public/seed.html">Generovat DEMO data</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/shared.js"></script>
+  <script src="assets/js/auth.js"></script>
+
+  <!-- Demo chip quick-login -->
+  <script>
+    document.getElementById('demoChips').addEventListener('click', function(e){
+      const chip = e.target.closest('[data-role]');
+      if (!chip) return;
+      const role = chip.dataset.role;
+      document.getElementById('username').value = role;
+      document.getElementById('password').value = 'heslo';
+      document.getElementById('loginForm').requestSubmit();
+    });
+  </script>
+</body>
+</html>
